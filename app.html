@@ -1,225 +1,253 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="apple-touch-icon" sizes="180x180" href="./imgs/icon.png">
-    <link rel="apple-touch-startup-image" href="./imgs/icon.png">
-    <meta name="apple-mobile-web-app-title" content="국방모바일보안">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <style>
-        @keyframes rotateInSteps {
-            from {
-                transform: translateX(-50%) rotate(0deg);
-            }
-            to {
-                transform: translateX(-50%) rotate(360deg);
-            }
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./imgs/icon.png" />
+  <link rel="apple-touch-startup-image" href="./imgs/icon.png" />
+  <meta name="apple-mobile-web-app-title" content="국방모바일보안" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
 
-        body, html {
-            margin: 0;
-            height: 100%;
-            overflow: hidden;
-            background-color: #222222;
-            position: relative;
-        }
+  <title>국방모바일보안</title>
 
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            pointer-events: none;
-        }
+  <style>
+    @keyframes rotateInSteps {
+      from { transform: translateX(-50%) rotate(0deg); }
+      to   { transform: translateX(-50%) rotate(360deg); }
+    }
 
-        #layer1 {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: #222222;
+      position: relative;
 
-        #container {
-            position: absolute;
-            top: 332px;
-            left: 50%;
-            width: 65%;
-            height: auto;
-            transform: translateX(-50%);
-        }
+      /* 전체 선택/롱프레스 방지 */
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+    }
 
-        #layer2 {
-            position: absolute;
-            left: 50%;
-            height: auto;
-            object-fit: contain;
-            animation: rotateInSteps 3s steps(33) infinite;
-        }
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
 
-        #layer3 {
-            position: absolute;
-            left: 50%;
-            width: 77%;
-            height: auto;
-            object-fit: contain;
-            transform: translate(-50%, 14.8%);
-            z-index: 1;
-        }
+    #layer1 {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
 
-        #install {
-            position: absolute;
-            top: 72px;
-            left: 158px;
-            text-align: center;
-            color: #fff;
-            font-size: 24px;
-            font-weight: 900;
-        }
-        
-        #block {
-            position: absolute;
-            top: 104.5px;
-            left: 158px;
-            text-align: center;
-            color: #fff;
-            font-size: 24px;
-            font-weight: 900;
-        }
+    #container {
+      position: absolute;
+      top: 332px;
+      left: 50%;
+      width: 65%;
+      height: auto;
+      transform: translateX(-50%);
+    }
 
-        #block_day {
-            position: absolute;
-            top: 495px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 500;
-        }
+    #layer2 {
+      position: absolute;
+      left: 50%;
+      height: auto;
+      object-fit: contain;
+      animation: rotateInSteps 3s steps(33) infinite;
+      transform: translateX(-50%);
+    }
 
-        #block_time {
-            position: absolute;
-            top: 514px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 500;
-        }
+    #layer3 {
+      position: absolute;
+      left: 50%;
+      width: 77%;
+      height: auto;
+      object-fit: contain;
+      transform: translate(-50%, 14.8%);
+      z-index: 1;
+    }
 
-        #app {
-            display: none;
-        }
+    #install {
+      position: absolute;
+      top: 72px;
+      left: 158px;
+      text-align: center;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 900;
+    }
 
-        #not_app {
-            display: block;
-        }
+    #block {
+      position: absolute;
+      top: 104.5px;
+      left: 158px;
+      text-align: center;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 900;
+    }
 
-        #not_app_top {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: #fff;
-            font-size: 20px;
-            font-weight: 900;
-        }
+    #block_day {
+      position: absolute;
+      top: 495px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 500;
+    }
 
-        #not_app_bottom {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 900;
-        }
-    </style>
-    <title>국방모바일보안</title>
+    #block_time {
+      position: absolute;
+      top: 514px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    #app { display: none; }
+    #not_app { display: block; }
+
+    #not_app_top {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 900;
+      white-space: pre-line;
+    }
+
+    #not_app_bottom {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+    }
+  </style>
 </head>
+
 <body>
-    <div id="not_app">
-        <div id="not_app_top"></div>
-        <div id="not_app_bottom">
-            아래 공유 아이콘을 누른 다음<br>'홈 화면에 추가'를 선택하세요.
-        </div>
+  <div id="not_app">
+    <div id="not_app_top"></div>
+    <div id="not_app_bottom">
+      아래 공유 아이콘을 누른 다음<br>'홈 화면에 추가'를 선택하세요.
     </div>
-    <div id="app">
-        <img src="./imgs/Layer1.png" alt="Layer 1" id="layer1">
-        <div id="container">
-            <img src="./imgs/Layer2.png" alt="Layer 2" id="layer2">
-            <img src="./imgs/Layer3.png" alt="Layer 3" id="layer3">
-        </div>
-        <span id="install">00.00.00 00:00</span>
-        <span id="block">00.00.00 00:00</span>
-        <span id="block_day">0일</span>
-        <span id="block_time">00:00:00</span>
+  </div>
+
+  <div id="app">
+    <img src="./imgs/Layer1.png" alt="Layer 1" id="layer1" />
+    <div id="container">
+      <img src="./imgs/Layer2.png" alt="Layer 2" id="layer2" />
+      <img src="./imgs/Layer3.png" alt="Layer 3" id="layer3" />
     </div>
-    <script>
-        const installDate = new Date(urlParam('install').toString());
-        const blockDate = new Date(urlParam('block').toString());
+    <span id="install">00.00.00 00:00</span>
+    <span id="block">00.00.00 00:00</span>
+    <span id="block_day">0일</span>
+    <span id="block_time">00:00:00</span>
+  </div>
 
-        function urlParam(name)
-        {
-            const queryString = window.location.search;
-            const urlParams = new URLSearchParams(queryString);
-            if (!urlParams.has(name)) { return false; } 
-            return urlParams.get(name).replaceAll(' ', '+');
-        }
+  <script>
+    // --- 선택/롱프레스 보조 차단(일부 브라우저용) ---
+    document.addEventListener('selectstart', e => e.preventDefault());
+    document.addEventListener('contextmenu', e => e.preventDefault());
 
-        function updateDateTime() {
-            const now = new Date();
-            const diff = now - blockDate;
-    
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
-            document.getElementById('install').innerText = formatDate(installDate);
-            document.getElementById('block').innerText = formatDate(blockDate);
-            document.getElementById('block_day').innerText = `${days}일`;
-            document.getElementById('block_time').innerText = formatTime(hours, minutes, seconds);
-        }
-    
-        function formatDate(date, yearSubstring = 2) {
-            return date.getFullYear().toString().substring(yearSubstring) + '.' +
-                   ((date.getMonth() + 1).toString().padStart(2, '0')) + '.' +
-                   (date.getDate().toString().padStart(2, '0')) + ' ' +
-                   (date.getHours().toString().padStart(2, '0')) + ':' +
-                   (date.getMinutes().toString().padStart(2, '0'));
-        }
-    
-        function formatTime(hours, minutes, seconds) {
-            return (hours.toString().padStart(2, '0')) + ':' +
-                   (minutes.toString().padStart(2, '0')) + ':' +
-                   (seconds.toString().padStart(2, '0'));
-        }
+    // --- 날짜 파싱 유틸: ISO 8601 권장 ---
+    const qs = new URLSearchParams(location.search);
 
-        function checkApp() {
-            const mqStandAlone = '(display-mode: standalone)';
-			if (!(navigator.standalone || window.matchMedia(mqStandAlone).matches)) {
-                document.getElementById('not_app_top').innerText = `❬ 국방모바일보안 ❭\n\n설치일시\n${formatDate(installDate, 0)}\n\n차단일시\n${formatDate(blockDate, 0)}`;
-                return;
-            }
-            document.getElementById('not_app').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-        }
-    
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log(urlParam('date').toString())
-            if (installDate !== false && blockDate !== false) {
-                checkApp();
-                updateDateTime();
-                setInterval(updateDateTime, 1000);
-            }
-        });
-    </script>    
+    function parseISOParam(key) {
+      const raw = qs.get(key);
+      if (!raw) return null;
+      // 공백으로 온 경우만 'T'로 치환해 ISO 형태에 맞춤 (여러 공백은 1개로)
+      const s = raw.trim().replace(/\s+/, 'T');
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    const installDate = parseISOParam('install');
+    const blockDate   = parseISOParam('block');
+
+    function two(n){ return n.toString().padStart(2,'0'); }
+
+    function formatDate(date, yearSubstring = 2) {
+      if (!date) return '—';
+      const y = date.getFullYear().toString().substring(yearSubstring);
+      const m = two(date.getMonth()+1);
+      const d = two(date.getDate());
+      const hh = two(date.getHours());
+      const mm = two(date.getMinutes());
+      return `${y}.${m}.${d} ${hh}:${mm}`;
+    }
+
+    function formatHMS(h, m, s){
+      return `${two(h)}:${two(m)}:${two(s)}`;
+    }
+
+    function isStandalone(){
+      const mq = '(display-mode: standalone)';
+      return !!(window.navigator.standalone || window.matchMedia(mq).matches);
+    }
+
+    function checkApp(){
+      const topEl = document.getElementById('not_app_top');
+      topEl.textContent =
+        `설치일시\n${formatDate(installDate, 0)}\n\n차단일시\n${formatDate(blockDate, 0)}`;
+
+      if (!isStandalone()) {
+        // 브라우저 탭 모드: 안내만 노출
+        document.getElementById('not_app').style.display = 'block';
+        document.getElementById('app').style.display = 'none';
+        return false;
+      }
+      // 스탠드얼론(PWA): 본 화면 노출
+      document.getElementById('not_app').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      return true;
+    }
+
+    function updateDateTime(){
+      if (!installDate || !blockDate) return;
+
+      const now = new Date();
+      const diff = Math.max(0, now.getTime() - blockDate.getTime());
+
+      const dayMs = 24*60*60*1000, hourMs = 60*60*1000, minMs = 60*1000;
+      const days = Math.floor(diff / dayMs);
+      const hours = Math.floor((diff % dayMs) / hourMs);
+      const minutes = Math.floor((diff % hourMs) / minMs);
+      const seconds = Math.floor((diff % minMs) / 1000);
+
+      document.getElementById('install').textContent = formatDate(installDate);
+      document.getElementById('block').textContent   = formatDate(blockDate);
+      document.getElementById('block_day').textContent = `${days}일`;
+      document.getElementById('block_time').textContent = formatHMS(hours, minutes, seconds);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const okApp = checkApp();
+      if (okApp && installDate && blockDate) {
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+      }
+    });
+  </script>
 </body>
 </html>
