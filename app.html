@@ -1,210 +1,171 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./imgs/icon.png" />
-  <link rel="apple-touch-startup-image" href="./imgs/icon.png" />
-  <meta name="apple-mobile-web-app-title" content="국방모바일보안" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="format-detection" content="telephone=no" />
-  <title>국방모바일보안</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link rel="apple-touch-icon" sizes="180x180" href="./imgs/icon.png" />
+<link rel="apple-touch-startup-image" href="./imgs/icon.png" />
+<meta name="apple-mobile-web-app-title" content="국방모바일보안" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="format-detection" content="telephone=no" />
+<title>국방모바일보안</title>
 
-  <style>
-    :root{
-      /* ===== 중앙 원/사진 미세 조정 ===== */
-      --container-w: 62vw;
-      --container-top: 348px;
-      --ring-scale: 0.86;     /* 회전 원 크기 */
-      --inner-scale: 0.62;    /* 내부 사진 크기 */
-      --inner-shiftY: 9%;
-      --label-day-top: 508px;
-      --label-time-top: 530px;
-    }
+<style>
+  :root{
+    /* ===== 상단 날짜 숫자 위치(배경의 콜론 뒤에 맞춤) ===== */
+    --date-left: 210px;          /* 필요 시 +/- 조정 */
+    --date-top-install: 72px;
+    --date-top-block:   104.5px;
 
-    @keyframes rotateInSteps {
-      from { transform: translateX(-50%) rotate(0deg); }
-      to   { transform: translateX(-50%) rotate(360deg); }
-    }
+    /* ===== 중앙 원/사진 ===== */
+    --container-top: 348px;      /* 중앙 원 영역의 상단 위치 */
+    --container-w: 62vw;         /* 중앙 원 영역 너비(최대 560px) */
+    --ring-scale: 0.86;          /* 회전 원 크기(컨테이너 대비) */
+    --inner-scale: 0.62;         /* 내부 사진 크기(컨테이너 대비) */
+    --elapsed-offset-y: 10%;     /* 경과시간 텍스트의 세로 미세 보정(+아래로) */
 
-    html, body {
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-      background-color: #222;
+    /* ===== 경과시간 글꼴 ===== */
+    --elapsed-font-size: 18px;
+  }
 
-      /* 전체 선택/롱프레스 방지 (입력 영역은 아래에서 허용) */
-      -webkit-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-      -webkit-tap-highlight-color: rgba(0,0,0,0);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", Arial, sans-serif;
-    }
+  @keyframes rotateInSteps {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
 
-    /* 입력/버튼에는 선택 허용 */
-    input, button, label, .allow-select, textarea, select {
-      -webkit-user-select: text;
-      -ms-user-select: text;
-      user-select: text;
-      -webkit-touch-callout: default;
-    }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden; background: #222;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", Arial, sans-serif;
+  }
 
-    img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+  /* 입력 UI는 선택 허용(브라우저 탭의 빌더 전용) */
+  input, button, label, .allow-select, textarea, select {
+    -webkit-user-select: text; user-select: text; -webkit-touch-callout: default;
+  }
 
-    #layer1 { position: absolute; inset: 0; object-fit: cover; }
+  /* 배경 레이어(상단 라벨 포함된 원본 이미지를 그대로 사용) */
+  #layer1 { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 
-    /* === 중앙 원 영역 === */
-    #container {
-      position: absolute;
-      top: var(--container-top);
-      left: 50%;
-      width: min(var(--container-w), 560px);
-      transform: translateX(-50%);
+  /* ===== 중앙 정사각 컨테이너 ===== */
+  #container {
+    position: absolute;
+    top: var(--container-top);
+    left: 50%;
+    width: min(var(--container-w), 560px);
+    aspect-ratio: 1 / 1;
+    transform: translateX(-50%);
+  }
+  /* iOS 구형 대비(만약 aspect-ratio 미지원 시) */
+  @supports not (aspect-ratio: 1 / 1) {
+    #container::before{
+      content:""; display:block; padding-top:100%;
     }
+  }
 
-    #layer2 {
-      position: absolute;
-      left: 50%;
-      width: calc(100% * var(--ring-scale));
-      object-fit: contain;
-      animation: rotateInSteps 3s steps(33) infinite;
-      transform: translateX(-50%);
-    }
-    #layer3 {
-      position: absolute;
-      left: 50%;
-      width: calc(100% * var(--inner-scale));
-      object-fit: contain;
-      transform: translate(-50%, var(--inner-shiftY));
-      z-index: 1;
-    }
+  /* 회전 원(원본 이미지 반드시 사용) */
+  #layer2 {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: calc(100% * var(--ring-scale));
+    height: auto;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
+    animation: rotateInSteps 3s steps(33) infinite;
+    pointer-events: none;
+  }
 
-    /* 상단 날짜 표기 */
-    #install, #block {
-      position: absolute;
-      left: 158px;
-      text-align: center;
-      color: #fff;
-      font-size: 24px;
-      font-weight: 900;
-    }
-    #install { top: 72px; }
-    #block   { top: 104.5px; }
+  /* 내부 사진(원본 이미지 반드시 사용) */
+  #layer3 {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: calc(100% * var(--inner-scale));
+    height: auto;
+    object-fit: contain;
+    transform: translate(-50%, calc(-50% + var(--elapsed-offset-y)));
+    z-index: 1;
+    pointer-events: none;
+  }
 
-    /* 원 아래 경과시간 */
-    #block_day, #block_time {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      color: #fff;
-      font-size: 18px;
-      font-weight: 500;
-    }
-    #block_day  { top: var(--label-day-top); }
-    #block_time { top: var(--label-time-top); }
+  /* 경과시간 텍스트(원 내부 중앙) */
+  #elapsed {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, calc(-50% + var(--elapsed-offset-y)));
+    text-align: center; color: #fff;
+    font-size: var(--elapsed-font-size); font-weight: 500;
+    line-height: 1.25;
+    z-index: 2;
+    pointer-events: none;
+  }
+  #block_day { display:block; margin-bottom: 4px; }
+  #block_time{ display:block; }
 
-    #app { display: none; }
-    #not_app { display: block; }
+  /* ===== 상단 날짜 숫자(배경 라벨과 정렬) ===== */
+  .date-val {
+    position: absolute;
+    left: var(--date-left);
+    color: #fff; font-size: 24px; font-weight: 900;
+    line-height: 1; letter-spacing: 0;
+    font-variant-numeric: tabular-nums;   /* 숫자 폭 고정으로 잘 맞춤 */
+  }
+  #install { top: var(--date-top-install); }
+  #block   { top: var(--date-top-block); }
 
-    /* === 웹사이트 모드 UI === */
-    #not_app_top {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      color: #fff;
-      font-size: 20px;
-      font-weight: 900;
-      white-space: pre-line;
-      padding: 0 16px;
-    }
-    #not_app_bottom {
-      position: absolute;
-      bottom: 40px; left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 900;
-    }
+  /* 웹사이트(브라우저 탭) 안내 */
+  #app { display:none; }
+  #not_app { display:block; }
+  #not_app_top {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center; color:#fff; font-size:20px; font-weight:900; white-space:pre-line; padding:0 16px;
+  }
+  #not_app_bottom {
+    position: absolute; bottom:40px; left:50%; transform: translateX(-50%);
+    text-align:center; color:#fff; font-size:16px; font-weight:900;
+  }
 
-    /* 날짜 빌더 카드 */
-    #builder {
-      position: absolute;
-      left: 50%;
-      top: 56%;
-      transform: translate(-50%, -50%);
-      width: min(520px, 88vw);
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
-      display: none; /* 기본은 숨김, 조건부 표시 */
-    }
-    #builder h3{
-      margin: 0 0 12px;
-      font-size: 18px; color: #fff;
-    }
-    .field{
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    label { color:#eee; font-size:14px; }
-    input[type="datetime-local"], input[type="text"]{
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.06);
-      color: #fff;
-      outline: none;
-    }
-    .row { display:flex; gap:8px; flex-wrap:wrap; }
-    button{
-      flex:1 1 auto;
-      padding: 10px 12px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #111;
-      background: #ffd05a;
-      border: none;
-      border-radius: 10px;
-    }
-    button.secondary{
-      background: #fff;
-    }
-    #link_out{
-      font-size: 12px; color:#ddd; word-break: break-all;
-      margin-top: 8px;
-    }
-    .muted { color:#bbb; font-size:12px; margin-top:6px; }
-    .rebuild {
-      margin-top: 10px; display:flex; gap:8px;
-    }
-  </style>
+  /* 날짜/링크 빌더 (파라미터 없을 때만 보임) */
+  #builder {
+    position: absolute; left: 50%; top: 56%;
+    transform: translate(-50%, -50%);
+    width: min(520px, 88vw);
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px; padding: 16px; box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    display: none;
+  }
+  #builder h3{ margin:0 0 12px; font-size:18px; color:#fff; }
+  .field{ display:grid; gap:8px; margin-bottom:12px; }
+  label{ color:#eee; font-size:14px; }
+  input[type="datetime-local"]{
+    width:100%; padding:10px 12px; border-radius:10px;
+    border:1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); color:#fff; outline:none;
+  }
+  .row{ display:flex; gap:8px; flex-wrap:wrap; }
+  button{ flex:1 1 auto; padding:10px 12px; font-size:15px; font-weight:700; color:#111; background:#ffd05a; border:none; border-radius:10px; }
+  button.secondary{ background:#fff; }
+  #link_out{ font-size:12px; color:#ddd; word-break:break-all; margin-top:8px; }
+  .muted{ color:#bbb; font-size:12px; margin-top:6px; }
+</style>
 </head>
 
 <body>
-  <!-- 웹사이트 모드 안내/빌더 -->
+  <!-- 브라우저 탭(웹사이트) 모드 -->
   <div id="not_app">
     <div id="not_app_top"></div>
 
-    <!-- 날짜/링크 빌더 (웹사이트에서 파라미터 없을 때 노출) -->
     <section id="builder" class="allow-select">
       <h3>설치·차단 일시 지정</h3>
       <div class="field">
         <label for="install_in">설치 일시</label>
-        <input id="install_in" type="datetime-local" autocomplete="off" />
+        <input id="install_in" type="datetime-local" autocomplete="off">
       </div>
       <div class="field">
         <label for="block_in">차단 일시</label>
-        <input id="block_in" type="datetime-local" autocomplete="off" />
+        <input id="block_in" type="datetime-local" autocomplete="off">
       </div>
       <div class="row">
         <button id="make_link">링크 생성</button>
@@ -217,175 +178,159 @@
       <div class="muted">* 미리보기로 이동한 뒤, 공유 아이콘 → <b>홈 화면에 추가</b>를 선택하세요.</div>
     </section>
 
-    <!-- 미리보기 화면 하단 안내 -->
     <div id="not_app_bottom">
       아래 공유 아이콘을 누른 다음<br>'홈 화면에 추가'를 선택하세요.
     </div>
   </div>
 
-  <!-- PWA/스탠드얼론 모드 UI -->
+  <!-- PWA(스탠드얼론) 모드 -->
   <div id="app">
-    <img src="./imgs/Layer1.png" alt="Layer 1" id="layer1" />
+    <img src="./imgs/Layer1.png" alt="배경" id="layer1" />
     <div id="container">
-      <img src="./imgs/Layer2.png" alt="Layer 2" id="layer2" />
-      <img src="./imgs/Layer3.png" alt="Layer 3" id="layer3" />
+      <img src="./imgs/Layer2.png" alt="회전 원" id="layer2" />
+      <img src="./imgs/Layer3.png" alt="내부 사진" id="layer3" />
+      <div id="elapsed">
+        <span id="block_day">0일</span>
+        <span id="block_time">00:00:00</span>
+      </div>
     </div>
-    <span id="install">00.00.00 00:00</span>
-    <span id="block">00.00.00 00:00</span>
-    <span id="block_day">0일</span>
-    <span id="block_time">00:00:00</span>
+    <!-- 배경의 '설치일시: / 차단일시:'와 정렬되는 숫자만 출력 -->
+    <span id="install" class="date-val">00.00.00 00:00</span>
+    <span id="block"   class="date-val">00.00.00 00:00</span>
   </div>
 
-  <script>
-    /* ===== 텍스트 선택/롱프레스 차단: 입력·빌더 영역은 허용 ===== */
-    document.addEventListener('selectstart', e => {
-      const t = e.target;
-      if (t.closest('#builder') || /INPUT|TEXTAREA|SELECT/.test(t.tagName)) return;
-      e.preventDefault();
-    });
-    document.addEventListener('contextmenu', e => {
-      if (e.target.closest('#builder')) return;
-      e.preventDefault();
-    });
+<script>
+  /* ===== 선택/롱프레스 차단: 입력칸은 허용 ===== */
+  document.addEventListener('selectstart', e => {
+    const t = e.target;
+    if (t.closest('#builder') || /INPUT|TEXTAREA|SELECT/.test(t.tagName)) return;
+    e.preventDefault();
+  });
+  document.addEventListener('contextmenu', e => {
+    if (e.target.closest('#builder')) return;
+    e.preventDefault();
+  });
 
-    /* ===== 공용 유틸 ===== */
-    const qs = new URLSearchParams(location.search);
-    function parseISOParam(key) {
-      const raw = qs.get(key);
-      if (!raw) return null;
-      const s = raw.trim().replace(/\s+/, 'T'); // 공백으로 온 경우 ISO 보정
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? null : d;
+  /* ===== 파라미터 파싱 ===== */
+  const qs = new URLSearchParams(location.search);
+  function parseISOParam(key) {
+    const raw = qs.get(key);
+    if (!raw) return null;
+    const s = raw.trim().replace(/\s+/, 'T'); // 공백으로 온 경우 ISO로 보정
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const installDate = parseISOParam('install');
+  const blockDate   = parseISOParam('block');
+
+  /* ===== 공용 포맷 ===== */
+  const two = n => n.toString().padStart(2,'0');
+  function formatDate(date, yearSubstring = 2) {
+    if (!date) return '—';
+    const y = date.getFullYear().toString().substring(yearSubstring);
+    const m = two(date.getMonth()+1);
+    const d = two(date.getDate());
+    const hh = two(date.getHours());
+    const mm = two(date.getMinutes());
+    return `${y}.${m}.${d} ${hh}:${mm}`;
+  }
+  const formatHMS = (h,m,s) => `${two(h)}:${two(m)}:${two(s)}`;
+  function isStandalone(){
+    const mq = '(display-mode: standalone)';
+    return !!(window.navigator.standalone || window.matchMedia(mq).matches);
+  }
+
+  /* ===== 화면 분기 ===== */
+  function showWebsitePreview(){
+    document.getElementById('not_app').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
+    const topEl = document.getElementById('not_app_top');
+    topEl.textContent =
+      `설치일시\n${formatDate(installDate, 0)}\n\n차단일시\n${formatDate(blockDate, 0)}`;
+
+    const hasParams = !!(installDate && blockDate);
+    document.getElementById('builder').style.display = hasParams ? 'none' : 'block';
+    document.getElementById('not_app_bottom').style.display = hasParams ? 'block' : 'none';
+  }
+  function showApp(){
+    document.getElementById('not_app').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  }
+
+  /* ===== 경과시간 업데이트(원 내부) + 상단 날짜 숫자 정렬 표시 ===== */
+  function updateDateTime(){
+    if (!installDate || !blockDate) return;
+
+    const now = new Date();
+    const diff = Math.max(0, now.getTime() - blockDate.getTime());
+
+    const dayMs = 24*60*60*1000, hourMs = 60*60*1000, minMs = 60*1000;
+    const days = Math.floor(diff / dayMs);
+    const hours = Math.floor((diff % dayMs) / hourMs);
+    const minutes = Math.floor((diff % hourMs) / minMs);
+    const seconds = Math.floor((diff % minMs) / 1000);
+
+    document.getElementById('install').textContent = formatDate(installDate);
+    document.getElementById('block').textContent   = formatDate(blockDate);
+    document.getElementById('install').style.top = getComputedStyle(document.documentElement).getPropertyValue('--date-top-install');
+    document.getElementById('block').style.top   = getComputedStyle(document.documentElement).getPropertyValue('--date-top-block');
+
+    document.getElementById('block_day').textContent  = `${days}일`;
+    document.getElementById('block_time').textContent = formatHMS(hours, minutes, seconds);
+  }
+
+  /* ===== 빌더 로직(웹사이트 모드) ===== */
+  function setDefaultInputs(){
+    const now = new Date();
+    const toLocalInput = (d) => {
+      const yyyy = d.getFullYear(), MM = two(d.getMonth()+1), DD = two(d.getDate());
+      const hh = two(d.getHours()), mm = two(d.getMinutes());
+      return `${yyyy}-${MM}-${DD}T${hh}:${mm}`;
+    };
+    const inst = document.getElementById('install_in');
+    const bloc = document.getElementById('block_in');
+    if (!inst.value) inst.value = toLocalInput(now);
+    if (!bloc.value) bloc.value = toLocalInput(now);
+  }
+  function buildLink(){
+    const inst = document.getElementById('install_in').value.trim();
+    const bloc = document.getElementById('block_in').value.trim();
+    if (!inst || !bloc) { alert('설치/차단 일시를 모두 지정해 주세요.'); return null; }
+    const base = location.origin + location.pathname;
+    return `${base}?install=${encodeURIComponent(inst)}&block=${encodeURIComponent(bloc)}`;
+  }
+  async function copyToClipboard(text){
+    try { await navigator.clipboard.writeText(text); alert('링크를 복사했습니다.'); }
+    catch {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('링크를 복사했습니다.');
     }
-    const installDate = parseISOParam('install');
-    const blockDate   = parseISOParam('block');
+  }
 
-    function two(n){ return n.toString().padStart(2,'0'); }
-    function formatDate(date, yearSubstring = 2) {
-      if (!date) return '—';
-      const y = date.getFullYear().toString().substring(yearSubstring);
-      const m = two(date.getMonth()+1);
-      const d = two(date.getDate());
-      const hh = two(date.getHours());
-      const mm = two(date.getMinutes());
-      return `${y}.${m}.${d} ${hh}:${mm}`;
-    }
-    function formatHMS(h, m, s){ return `${two(h)}:${two(m)}:${two(s)}`; }
-    function isStandalone(){
-      const mq = '(display-mode: standalone)';
-      return !!(window.navigator.standalone || window.matchMedia(mq).matches);
-    }
-
-    function setTopPreviewText(){
-      const topEl = document.getElementById('not_app_top');
-      topEl.textContent =
-        `설치일시\n${formatDate(installDate, 0)}\n\n차단일시\n${formatDate(blockDate, 0)}`;
-    }
-
-    function showWebsitePreview(){
-      document.getElementById('not_app').style.display = 'block';
-      document.getElementById('app').style.display = 'none';
-      setTopPreviewText();
-      // 파라미터가 있으면 빌더 숨기고, 없으면 빌더 노출
-      const hasParams = !!(installDate && blockDate);
-      document.getElementById('builder').style.display = hasParams ? 'none' : 'block';
-      document.getElementById('not_app_bottom').style.display = hasParams ? 'block' : 'none';
-    }
-
-    function showApp(){
-      document.getElementById('not_app').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-    }
-
-    function updateDateTime(){
-      if (!installDate || !blockDate) return;
-      const now = new Date();
-      const diff = Math.max(0, now.getTime() - blockDate.getTime());
-
-      const dayMs = 24*60*60*1000, hourMs = 60*60*1000, minMs = 60*1000;
-      const days = Math.floor(diff / dayMs);
-      const hours = Math.floor((diff % dayMs) / hourMs);
-      const minutes = Math.floor((diff % hourMs) / minMs);
-      const seconds = Math.floor((diff % minMs) / 1000);
-
-      document.getElementById('install').textContent = formatDate(installDate);
-      document.getElementById('block').textContent   = formatDate(blockDate);
-      document.getElementById('block_day').textContent = `${days}일`;
-      document.getElementById('block_time').textContent = formatHMS(hours, minutes, seconds);
-    }
-
-    /* ===== 링크 빌더 로직 ===== */
-    function setDefaultInputs(){
-      const now = new Date();
-      const toLocalInput = (d) => {
-        const yyyy = d.getFullYear();
-        const MM = two(d.getMonth()+1);
-        const DD = two(d.getDate());
-        const hh = two(d.getHours());
-        const mm = two(d.getMinutes());
-        return `${yyyy}-${MM}-${DD}T${hh}:${mm}`;
+  document.addEventListener('DOMContentLoaded', () => {
+    if (isStandalone()) {
+      showApp();
+      if (installDate && blockDate) {
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+      }
+    } else {
+      showWebsitePreview();
+      setDefaultInputs();
+      document.getElementById('make_link').onclick = () => {
+        const link = buildLink(); if (!link) return;
+        document.getElementById('link_out').textContent = link;
       };
-      const inst = document.getElementById('install_in');
-      const bloc = document.getElementById('block_in');
-      if (!inst.value) inst.value = toLocalInput(now);
-      if (!bloc.value) bloc.value = toLocalInput(now);
+      document.getElementById('go_preview').onclick = () => {
+        const link = document.getElementById('link_out').textContent || buildLink();
+        if (!link) return; location.href = link;
+      };
+      document.getElementById('copy_link').onclick = async () => {
+        const link = document.getElementById('link_out').textContent || buildLink();
+        if (!link) return; await copyToClipboard(link);
+      };
     }
-
-    function buildLink(){
-      const inst = document.getElementById('install_in').value.trim();
-      const bloc = document.getElementById('block_in').value.trim();
-      if (!inst || !bloc) { alert('설치/차단 일시를 모두 지정해 주세요.'); return null; }
-      // datetime-local 값은 'YYYY-MM-DDTHH:mm' (로컬시간)
-      const base = location.origin + location.pathname;
-      return `${base}?install=${encodeURIComponent(inst)}&block=${encodeURIComponent(bloc)}`;
-    }
-
-    async function copyToClipboard(text){
-      try {
-        await navigator.clipboard.writeText(text);
-        alert('링크를 복사했습니다.');
-      } catch {
-        // iOS 구형 대비
-        const ta = document.createElement('textarea');
-        ta.value = text; document.body.appendChild(ta);
-        ta.select(); document.execCommand('copy');
-        document.body.removeChild(ta);
-        alert('링크를 복사했습니다.');
-      }
-    }
-
-    /* ===== 초기 진입 분기 ===== */
-    document.addEventListener('DOMContentLoaded', () => {
-      if (isStandalone()) {
-        // PWA 모드
-        showApp();
-        if (installDate && blockDate) {
-          updateDateTime();
-          setInterval(updateDateTime, 1000);
-        }
-      } else {
-        // 웹사이트 모드
-        showWebsitePreview();
-        setDefaultInputs();
-
-        // 빌더 버튼들
-        document.getElementById('make_link').onclick = () => {
-          const link = buildLink();
-          if (!link) return;
-          document.getElementById('link_out').textContent = link;
-        };
-        document.getElementById('go_preview').onclick = () => {
-          const link = document.getElementById('link_out').textContent || buildLink();
-          if (!link) return;
-          location.href = link; // 한 번 더 이동 → 여기서 '홈 화면에 추가'
-        };
-        document.getElementById('copy_link').onclick = async () => {
-          const link = document.getElementById('link_out').textContent || buildLink();
-          if (!link) return;
-          await copyToClipboard(link);
-        };
-      }
-    });
-  </script>
+  });
+</script>
 </body>
 </html>
