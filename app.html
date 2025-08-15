@@ -13,25 +13,26 @@
 
 <style>
   :root{
-    /* ===== 상단 날짜 숫자 위치(배경의 콜론 뒤에 맞춤) ===== */
-    --date-left: 210px;          /* 필요 시 +/- 조정 */
-    --date-top-install: 72px;
-    --date-top-block:   104.5px;
+    /* ==== [1] 상단 '시간' 숫자 위치 (왼쪽·아래로 이동) ==== */
+    --date-left: 196px;         /* ← 더 왼쪽으로 이동(기존 210px 근처에서 조정) */
+    --date-top-install: 78px;   /* ↓ 더 아래로 (기존 72px) */
+    --date-top-block:   110.5px;/* ↓ 더 아래로 (기존 104.5px) */
 
-    /* ===== 중앙 원/사진 ===== */
-    --container-top: 348px;      /* 중앙 원 영역의 상단 위치 */
-    --container-w: 62vw;         /* 중앙 원 영역 너비(최대 560px) */
-    --ring-scale: 0.86;          /* 회전 원 크기(컨테이너 대비) */
-    --inner-scale: 0.62;         /* 내부 사진 크기(컨테이너 대비) */
-    --elapsed-offset-y: 10%;     /* 경과시간 텍스트의 세로 미세 보정(+아래로) */
+    /* ==== [2] 중앙 원/사진(최초 위치 유지 + 크기만 20% 축소) ==== */
+    --container-top: 332px;     /* 최초 코드와 동일 */
+    --container-w: 65%;         /* 최초 코드와 동일 */
+    --ring-shrink: 0.8;         /* 20% 축소 */
+    --inner-shrink: 0.8;        /* 20% 축소 (Layer3) */
 
-    /* ===== 경과시간 글꼴 ===== */
-    --elapsed-font-size: 18px;
+    /* ==== [3] 경과시간 위치(조금 아래로) ==== */
+    --elapsed-day-top: 505px;   /* 기존 495px → 505px */
+    --elapsed-time-top: 526px;  /* 기존 514px → 526px */
   }
 
+  /* 회전(최초 코드와 동일한 트랜스폼 + 축소만 추가) */
   @keyframes rotateInSteps {
-    from { transform: translate(-50%, -50%) rotate(0deg); }
-    to   { transform: translate(-50%, -50%) rotate(360deg); }
+    from { transform: translateX(-50%) scale(var(--ring-shrink)) rotate(0deg); }
+    to   { transform: translateX(-50%) scale(var(--ring-shrink)) rotate(360deg); }
   }
 
   html, body {
@@ -46,77 +47,82 @@
     -webkit-user-select: text; user-select: text; -webkit-touch-callout: default;
   }
 
-  /* 배경 레이어(상단 라벨 포함된 원본 이미지를 그대로 사용) */
-  #layer1 { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+  img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 
-  /* ===== 중앙 정사각 컨테이너 ===== */
+  /* ===== 배경 ===== */
+  #layer1 {
+    position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover;
+  }
+
+  /* ===== 중앙 컨테이너: 최초 코드의 위치/폭 그대로 ===== */
   #container {
     position: absolute;
     top: var(--container-top);
     left: 50%;
-    width: min(var(--container-w), 560px);
-    aspect-ratio: 1 / 1;
+    width: var(--container-w);
+    height: auto;
     transform: translateX(-50%);
   }
-  /* iOS 구형 대비(만약 aspect-ratio 미지원 시) */
-  @supports not (aspect-ratio: 1 / 1) {
-    #container::before{
-      content:""; display:block; padding-top:100%;
-    }
-  }
 
-  /* 회전 원(원본 이미지 반드시 사용) */
+  /* ===== Layer2: 최초 위치(가운데 정렬) + 20% 축소 + 회전 ===== */
   #layer2 {
     position: absolute;
-    top: 50%; left: 50%;
-    width: calc(100% * var(--ring-scale));
+    left: 50%;
     height: auto;
     object-fit: contain;
-    transform: translate(-50%, -50%);
     animation: rotateInSteps 3s steps(33) infinite;
-    pointer-events: none;
+    /* transform은 animation 키프레임에서 관리(translateX + scale + rotate) */
   }
 
-  /* 내부 사진(원본 이미지 반드시 사용) */
+  /* ===== Layer3: 최초 위치(가운데 + 14.8% 아래) + 20% 축소 ===== */
   #layer3 {
     position: absolute;
-    top: 50%; left: 50%;
-    width: calc(100% * var(--inner-scale));
+    left: 50%;
+    width: 77%;               /* 최초 코드와 동일한 너비 비율 */
     height: auto;
     object-fit: contain;
-    transform: translate(-50%, calc(-50% + var(--elapsed-offset-y)));
+    transform: translate(-50%, 14.8%) scale(var(--inner-shrink));
     z-index: 1;
-    pointer-events: none;
   }
 
-  /* 경과시간 텍스트(원 내부 중앙) */
-  #elapsed {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, calc(-50% + var(--elapsed-offset-y)));
-    text-align: center; color: #fff;
-    font-size: var(--elapsed-font-size); font-weight: 500;
-    line-height: 1.25;
-    z-index: 2;
-    pointer-events: none;
-  }
-  #block_day { display:block; margin-bottom: 4px; }
-  #block_time{ display:block; }
-
-  /* ===== 상단 날짜 숫자(배경 라벨과 정렬) ===== */
+  /* ===== 상단 날짜 숫자: 배경 라벨(설치일시:/차단일시:)과 정렬 ===== */
   .date-val {
     position: absolute;
     left: var(--date-left);
     color: #fff; font-size: 24px; font-weight: 900;
     line-height: 1; letter-spacing: 0;
-    font-variant-numeric: tabular-nums;   /* 숫자 폭 고정으로 잘 맞춤 */
+    font-variant-numeric: tabular-nums; /* 숫자 폭 고정 */
   }
   #install { top: var(--date-top-install); }
   #block   { top: var(--date-top-block); }
 
-  /* 웹사이트(브라우저 탭) 안내 */
-  #app { display:none; }
-  #not_app { display:block; }
+  /* ===== 경과시간: 가운데 정렬 그대로, 살짝 아래로 ===== */
+  #block_day {
+    position: absolute;
+    top: var(--elapsed-day-top);
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  #block_time {
+    position: absolute;
+    top: var(--elapsed-time-top);
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  /* ===== 모드 분기 ===== */
+  #app { display: none; }
+  #not_app { display: block; }
+
+  /* ===== 웹사이트(브라우저 탭) 안내/빌더 ===== */
   #not_app_top {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
@@ -127,7 +133,6 @@
     text-align:center; color:#fff; font-size:16px; font-weight:900;
   }
 
-  /* 날짜/링크 빌더 (파라미터 없을 때만 보임) */
   #builder {
     position: absolute; left: 50%; top: 56%;
     transform: translate(-50%, -50%);
@@ -135,7 +140,7 @@
     background: rgba(0,0,0,0.55);
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 14px; padding: 16px; box-shadow: 0 10px 24px rgba(0,0,0,0.35);
-    display: none;
+    display: none; /* 파라미터 없을 때만 표시 */
   }
   #builder h3{ margin:0 0 12px; font-size:18px; color:#fff; }
   .field{ display:grid; gap:8px; margin-bottom:12px; }
@@ -153,7 +158,7 @@
 </head>
 
 <body>
-  <!-- 브라우저 탭(웹사이트) 모드 -->
+  <!-- 웹사이트(브라우저 탭) 모드 -->
   <div id="not_app">
     <div id="not_app_top"></div>
 
@@ -187,16 +192,18 @@
   <div id="app">
     <img src="./imgs/Layer1.png" alt="배경" id="layer1" />
     <div id="container">
+      <!-- [중요] 최초 위치 + 20% 축소만 적용 -->
       <img src="./imgs/Layer2.png" alt="회전 원" id="layer2" />
       <img src="./imgs/Layer3.png" alt="내부 사진" id="layer3" />
-      <div id="elapsed">
-        <span id="block_day">0일</span>
-        <span id="block_time">00:00:00</span>
-      </div>
     </div>
-    <!-- 배경의 '설치일시: / 차단일시:'와 정렬되는 숫자만 출력 -->
+
+    <!-- 상단 날짜 숫자(배경 라벨과 정렬되는 숫자만 출력) -->
     <span id="install" class="date-val">00.00.00 00:00</span>
     <span id="block"   class="date-val">00.00.00 00:00</span>
+
+    <!-- 경과시간(중앙, 기존보다 조금 아래) -->
+    <span id="block_day">0일</span>
+    <span id="block_time">00:00:00</span>
   </div>
 
 <script>
@@ -216,7 +223,7 @@
   function parseISOParam(key) {
     const raw = qs.get(key);
     if (!raw) return null;
-    const s = raw.trim().replace(/\s+/, 'T'); // 공백으로 온 경우 ISO로 보정
+    const s = raw.trim().replace(/\s+/, 'T'); // 공백 입력 시 ISO 보정
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
   }
@@ -257,7 +264,7 @@
     document.getElementById('app').style.display = 'block';
   }
 
-  /* ===== 경과시간 업데이트(원 내부) + 상단 날짜 숫자 정렬 표시 ===== */
+  /* ===== 경과시간 업데이트 + 상단 날짜 출력 ===== */
   function updateDateTime(){
     if (!installDate || !blockDate) return;
 
@@ -270,16 +277,16 @@
     const minutes = Math.floor((diff % hourMs) / minMs);
     const seconds = Math.floor((diff % minMs) / 1000);
 
+    // 상단 날짜(배경 라벨과 정렬)
     document.getElementById('install').textContent = formatDate(installDate);
     document.getElementById('block').textContent   = formatDate(blockDate);
-    document.getElementById('install').style.top = getComputedStyle(document.documentElement).getPropertyValue('--date-top-install');
-    document.getElementById('block').style.top   = getComputedStyle(document.documentElement).getPropertyValue('--date-top-block');
 
+    // 경과시간(조금 아래)
     document.getElementById('block_day').textContent  = `${days}일`;
     document.getElementById('block_time').textContent = formatHMS(hours, minutes, seconds);
   }
 
-  /* ===== 빌더 로직(웹사이트 모드) ===== */
+  /* ===== 링크 빌더(웹사이트 모드) ===== */
   function setDefaultInputs(){
     const now = new Date();
     const toLocalInput = (d) => {
